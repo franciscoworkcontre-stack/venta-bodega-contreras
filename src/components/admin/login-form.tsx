@@ -1,13 +1,10 @@
 "use client";
 import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-
 export function AdminLoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleSubmit: React.EventHandler<React.SyntheticEvent<HTMLFormElement>> = async (e) => {
     e.preventDefault();
@@ -23,8 +20,7 @@ export function AdminLoginForm() {
       setLoading(false);
       return;
     }
-    router.push("/admin/dashboard");
-    router.refresh();
+    window.location.href = "/admin/dashboard";
   };
 
   return (
