@@ -1,46 +1,64 @@
 "use client";
 import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function AdminLoginForm() {
-  const [sent, setSent] = useState(false);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit: React.EventHandler<React.SyntheticEvent<HTMLFormElement>> = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     const supabase = createClient();
-    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? "";
-    await supabase.auth.signInWithOtp({
-      email: adminEmail,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: "admincontreras@bodega.cl",
+      password,
     });
-    setSent(true);
-    setLoading(false);
+    if (signInError) {
+      setError("Contraseña incorrecta.");
+      setLoading(false);
+      return;
+    }
+    router.push("/admin/dashboard");
+    router.refresh();
   };
-
-  if (sent) {
-    return (
-      <div className="border-2 border-[#0A0A0A] shadow-[4px_4px_0_#0A0A0A] bg-[#FFD60A] p-6">
-        <p className="font-display font-bold">
-          Revisa tu email. Te llegó el magic link.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="font-body text-sm text-[#0A0A0A]/60">
-        Manda magic link a{" "}
-        <strong>{process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? "tu email"}</strong>
-      </p>
+      <div>
+        <label className="block text-sm font-bold mb-1 uppercase">Usuario</label>
+        <input
+          type="text"
+          value="admincontreras"
+          readOnly
+          className="w-full border-2 border-[#0A0A0A] px-3 py-2 bg-[#0A0A0A]/5 font-mono text-sm"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-bold mb-1 uppercase">Contraseña</label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className="w-full border-2 border-[#0A0A0A] px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#FFD60A]"
+          placeholder="••••••••"
+        />
+      </div>
+      {error && (
+        <p className="text-[#E63946] text-sm font-bold">{error}</p>
+      )}
       <button
         type="submit"
         disabled={loading}
-        className="brutal-btn w-full py-3 bg-[#FFD60A] font-display font-black"
+        className="brutal-btn w-full py-3 bg-[#FFD60A] font-black uppercase"
+        style={{ fontFamily: "var(--font-display)" }}
       >
-        {loading ? "Enviando..." : "Entrar al admin"}
+        {loading ? "Entrando..." : "Entrar"}
       </button>
     </form>
   );

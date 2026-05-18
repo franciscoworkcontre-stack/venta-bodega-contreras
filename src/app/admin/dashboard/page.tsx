@@ -5,6 +5,7 @@ import Link from "next/link";
 import { formatCLP } from "@/lib/utils";
 import { AdminProductRow } from "@/components/admin/product-row";
 import { AdminReservationRow } from "@/components/admin/reservation-row";
+import { LogoutButton } from "@/components/admin/logout-button";
 
 export default async function DashboardPage() {
   await requireAdmin();
@@ -30,13 +31,16 @@ export default async function DashboardPage() {
         >
           Dashboard
         </h1>
-        <Link
-          href="/admin/producto/nuevo"
-          className="brutal-btn px-4 py-2 bg-[#FFD60A] text-sm"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          + Nuevo producto
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/admin/producto/nuevo"
+            className="brutal-btn px-4 py-2 bg-[#FFD60A] text-sm"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            + Nuevo producto
+          </Link>
+          <LogoutButton />
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-12">
