@@ -1,22 +1,21 @@
-import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+const COOKIE_NAME = "admin_session";
+const ADMIN_SECRET = process.env.ADMIN_SECRET!;
+
 export async function requireAdmin() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user || user.email !== process.env.ADMIN_EMAIL) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
+  if (!token || token !== ADMIN_SECRET) {
     redirect("/admin");
   }
-  return user;
+  return true;
 }
 
 export async function getAdminSession() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user || user.email !== process.env.ADMIN_EMAIL) return null;
-  return user;
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
+  if (!token || token !== ADMIN_SECRET) return null;
+  return true;
 }

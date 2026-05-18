@@ -1,8 +1,8 @@
 "use client";
-import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
+import { loginAdmin } from "@/actions/auth";
+
 export function AdminLoginForm() {
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -10,17 +10,13 @@ export function AdminLoginForm() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: "admincontreras@bodega.cl",
-      password,
-    });
-    if (signInError) {
-      setError("Contraseña incorrecta.");
+    const form = e.currentTarget;
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+    const result = await loginAdmin(password);
+    if (result?.error) {
+      setError(result.error);
       setLoading(false);
-      return;
     }
-    window.location.href = "/admin/dashboard";
   };
 
   return (
@@ -38,8 +34,7 @@ export function AdminLoginForm() {
         <label className="block text-sm font-bold mb-1 uppercase">Contraseña</label>
         <input
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          name="password"
           required
           className="w-full border-2 border-[#0A0A0A] px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#FFD60A]"
           placeholder="••••••••"
