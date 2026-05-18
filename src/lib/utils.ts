@@ -24,10 +24,10 @@ export function slugify(text: string): string {
     .trim();
 }
 
-export function formatChileanDate(date: Date): string {
+export function formatChileanDate(date: Date | string): string {
   return new Intl.DateTimeFormat("es-CL", {
     timeZone: "America/Santiago",
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(date);
+  }).format(new Date(date));
 }

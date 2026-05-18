@@ -49,3 +49,47 @@ body {
 .brutal-input:focus {
   box-shadow: 6px 6px 0 #0A0A0A;
 }
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  animation: marquee 18s linear infinite;
+  will-change: transform;
+}
+
+@keyframes wobble {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(-3deg) scale(1.04); }
+}
+
+@keyframes wobble2 {
+  0%, 100% { transform: rotate(12deg); }
+  50% { transform: rotate(9deg) scale(1.04); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes takeoff {
+  0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  60%  { transform: translate(55vw, -30px) rotate(-18deg); opacity: 1; }
+  80%  { transform: translate(80vw, -80px) rotate(-25deg); opacity: 0.6; }
+  100% { transform: translate(110vw, -140px) rotate(-28deg); opacity: 0; }
+}
+
+.plane-takeoff {
+  animation: takeoff 3.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: 0.6s;
+}
+
+.sticker-wobble-1 {
+  animation: wobble 3s ease-in-out infinite;
+}
+.sticker-wobble-2 {
+  animation: wobble2 2.6s ease-in-out infinite;
+}

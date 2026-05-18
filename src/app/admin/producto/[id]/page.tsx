@@ -1,7 +1,6 @@
 import { requireAdmin } from "@/lib/auth";
-import { db } from "@/db";
-import { products } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { supabaseAdmin } from "@/lib/supabase-admin";
+import type { Product } from "@/db/schema";
 import { notFound } from "next/navigation";
 import { ProductForm } from "@/components/admin/product-form";
 
@@ -12,11 +11,14 @@ export default async function EditarProductoPage({
 }) {
   await requireAdmin();
   const { id } = await params;
-  const [product] = await db
-    .select()
-    .from(products)
-    .where(eq(products.id, id));
-  if (!product) notFound();
+  const { data } = await supabaseAdmin
+    .from("products")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (!data) notFound();
+  const product = data as Product;
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">

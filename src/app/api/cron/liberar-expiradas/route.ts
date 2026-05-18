@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
-import { products, reservations } from "@/db/schema";
-import { and, eq, inArray, lt } from "drizzle-orm";
+import { supabaseAdmin } from "@/lib/supabase-admin";
+import type { Reservation } from "@/db/schema";
 
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
@@ -9,28 +8,24 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const expiredReservations = await db
-    .select()
-    .from(reservations)
-    .where(
-      and(
-        eq(reservations.status, "activa"),
-        lt(reservations.expires_at, new Date())
-      )
-    );
+  const { data } = await supabaseAdmin
+    .from("reservations")
+    .select("*")
+    .eq("status", "activa")
+    .lt("expires_at", new Date().toISOString());
+
+  const expiredReservations = (data ?? []) as Reservation[];
 
   for (const reservation of expiredReservations) {
-    await db.transaction(async (tx) => {
-      await tx
-        .update(reservations)
-        .set({ status: "expirada" })
-        .where(eq(reservations.id, reservation.id));
+    await supabaseAdmin
+      .from("reservations")
+      .update({ status: "expirada" })
+      .eq("id", reservation.id);
 
-      await tx
-        .update(products)
-        .set({ status: "disponible", reserved_at: null, reserved_until: null })
-        .where(inArray(products.id, reservation.product_ids));
-    });
+    await supabaseAdmin
+      .from("products")
+      .update({ status: "disponible", reserved_at: null, reserved_until: null })
+      .in("id", reservation.product_ids);
   }
 
   return NextResponse.json({ released: expiredReservations.length });

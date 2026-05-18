@@ -1,6 +1,5 @@
-import { db } from "@/db";
-import { reservations, products } from "@/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { supabaseAdmin } from "@/lib/supabase-admin";
+import type { Reservation, Product } from "@/db/schema";
 import { notFound } from "next/navigation";
 import { formatCLP, formatChileanDate } from "@/lib/utils";
 
@@ -10,16 +9,21 @@ export default async function ReservaExitoPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [reservation] = await db
-    .select()
-    .from(reservations)
-    .where(eq(reservations.id, id));
-  if (!reservation) notFound();
+  const { data: resData } = await supabaseAdmin
+    .from("reservations")
+    .select("*")
+    .eq("id", id)
+    .single();
 
-  const reservedProducts = await db
-    .select()
-    .from(products)
-    .where(inArray(products.id, reservation.product_ids));
+  if (!resData) notFound();
+  const reservation = resData as Reservation;
+
+  const { data: productsData } = await supabaseAdmin
+    .from("products")
+    .select("*")
+    .in("id", reservation.product_ids);
+
+  const reservedProducts = (productsData ?? []) as Product[];
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-16 text-center">
@@ -36,7 +40,7 @@ export default async function ReservaExitoPage({
           Tenís 12 horas para confirmar.
         </p>
         <p className="text-sm text-[#0A0A0A]/60">
-          Expira: {formatChileanDate(reservation.expires_at)}
+          Expira: {formatChileanDate(new Date(reservation.expires_at))}
         </p>
       </div>
 

@@ -30,9 +30,16 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
+      initial={{ opacity: 0, y: -60, rotate: (index % 2 === 0 ? -3 : 3) }}
+      whileInView={{ opacity: 1, y: 0, rotate: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{
+        type: "spring",
+        stiffness: 260,
+        damping: 18,
+        delay: (index % 4) * 0.08,
+      }}
+      whileHover={{ y: -6, rotate: -1, transition: { duration: 0.15 } }}
       className="brutal-card bg-white relative overflow-hidden flex flex-col"
     >
       {isVendido && (

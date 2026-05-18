@@ -1,6 +1,5 @@
-import { db } from "@/db";
-import { products } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { supabaseAdmin } from "@/lib/supabase-admin";
+import type { Product } from "@/db/schema";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { formatCLP } from "@/lib/utils";
@@ -24,11 +23,14 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [product] = await db
-    .select()
-    .from(products)
-    .where(eq(products.slug, slug));
-  if (!product) notFound();
+  const { data } = await supabaseAdmin
+    .from("products")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+
+  if (!data) notFound();
+  const product = data as Product;
 
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-8 py-12">
@@ -87,6 +89,17 @@ export default async function ProductPage({
           <p className="text-base leading-relaxed text-[#0A0A0A]/70">
             {product.description}
           </p>
+
+          {product.reference_url && (
+            <a
+              href={product.reference_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-sm font-bold underline text-[#0A0A0A]/60 hover:text-[#0A0A0A] transition-colors"
+            >
+              Ver referencia del producto ↗
+            </a>
+          )}
 
           <div className="mt-4">
             {product.status === "disponible" ? (

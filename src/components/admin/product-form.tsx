@@ -22,6 +22,7 @@ export function ProductForm({ product }: { product?: Product }) {
           price_clp: product.price_clp,
           condition: product.condition,
           category: product.category ?? "",
+          reference_url: product.reference_url ?? "",
           status: product.status,
         }
       : {
@@ -83,6 +84,20 @@ export function ProductForm({ product }: { product?: Product }) {
           className="brutal-input w-full px-3 py-2 text-sm"
           placeholder="living, cocina, ropa..."
         />
+      </div>
+
+      <div>
+        <label className="font-bold text-sm uppercase block mb-1">
+          Link de referencia
+        </label>
+        <input
+          {...register("reference_url")}
+          className="brutal-input w-full px-3 py-2 text-sm"
+          placeholder="https://articulo.mercadolibre.cl/..."
+        />
+        {errors.reference_url && (
+          <p className="text-[#E63946] text-xs mt-1">{errors.reference_url.message}</p>
+        )}
       </div>
 
       <div>

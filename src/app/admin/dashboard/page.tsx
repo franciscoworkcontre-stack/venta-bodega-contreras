@@ -1,7 +1,6 @@
 import { requireAdmin } from "@/lib/auth";
-import { db } from "@/db";
-import { products, reservations } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { supabaseAdmin } from "@/lib/supabase-admin";
+import type { Product, Reservation } from "@/db/schema";
 import Link from "next/link";
 import { formatCLP } from "@/lib/utils";
 import { AdminProductRow } from "@/components/admin/product-row";
@@ -10,10 +9,13 @@ import { AdminReservationRow } from "@/components/admin/reservation-row";
 export default async function DashboardPage() {
   await requireAdmin();
 
-  const [allProducts, activeReservations] = await Promise.all([
-    db.select().from(products).orderBy(products.created_at),
-    db.select().from(reservations).where(eq(reservations.status, "activa")),
+  const [{ data: productsData }, { data: reservationsData }] = await Promise.all([
+    supabaseAdmin.from("products").select("*").order("created_at", { ascending: true }),
+    supabaseAdmin.from("reservations").select("*").eq("status", "activa"),
   ]);
+
+  const allProducts = (productsData ?? []) as Product[];
+  const activeReservations = (reservationsData ?? []) as Reservation[];
 
   const disponibles = allProducts.filter((p) => p.status === "disponible").length;
   const reservados = allProducts.filter((p) => p.status === "reservado").length;

@@ -1,11 +1,10 @@
 "use server";
 
-import { db } from "@/db";
-import { products, reservations } from "@/db/schema";
+import { supabaseAdmin } from "@/lib/supabase-admin";
+import type { Product } from "@/db/schema";
 import { reservationSchema } from "@/lib/schemas";
 import { sendTelegramMessage } from "@/lib/telegram";
 import { formatCLP, formatChileanDate } from "@/lib/utils";
-import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function crearReserva(formData: unknown) {
@@ -17,50 +16,54 @@ export async function crearReserva(formData: unknown) {
   const { buyer_name, buyer_phone, buyer_email, buyer_message, product_ids } =
     parsed.data;
 
-  return await db.transaction(async (tx) => {
-    const availableProducts = await tx
-      .select()
-      .from(products)
-      .where(
-        and(
-          inArray(products.id, product_ids),
-          eq(products.status, "disponible")
-        )
-      );
+  const { data: productsData } = await supabaseAdmin
+    .from("products")
+    .select("*")
+    .in("id", product_ids)
+    .eq("status", "disponible");
 
-    if (availableProducts.length !== product_ids.length) {
-      return {
-        error: { _form: ["Algunos productos ya no están disponibles"] },
-      };
-    }
+  const availableProducts = (productsData ?? []) as Product[];
 
-    const total = availableProducts.reduce((s, p) => s + p.price_clp, 0);
-    const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000);
-    const now = new Date();
+  if (availableProducts.length !== product_ids.length) {
+    return { error: { _form: ["Algunos productos ya no están disponibles"] } };
+  }
 
-    const [reservation] = await tx
-      .insert(reservations)
-      .values({
-        buyer_name,
-        buyer_phone,
-        buyer_email: buyer_email || null,
-        buyer_message: buyer_message || null,
-        product_ids,
-        total_clp: total,
-        expires_at: expiresAt,
-      })
-      .returning();
+  const total = availableProducts.reduce((s, p) => s + p.price_clp, 0);
+  const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000);
+  const now = new Date();
 
-    await tx
-      .update(products)
-      .set({ status: "reservado", reserved_at: now, reserved_until: expiresAt })
-      .where(inArray(products.id, product_ids));
+  const { data: reservationData, error: resError } = await supabaseAdmin
+    .from("reservations")
+    .insert({
+      buyer_name,
+      buyer_phone,
+      buyer_email: buyer_email || null,
+      buyer_message: buyer_message || null,
+      product_ids,
+      total_clp: total,
+      expires_at: expiresAt.toISOString(),
+    })
+    .select()
+    .single();
 
-    const productLines = availableProducts
-      .map((p) => `• ${p.title} — ${formatCLP(p.price_clp)}`)
-      .join("\n");
+  if (resError || !reservationData) {
+    return { error: { _form: ["Error al crear la reserva"] } };
+  }
 
-    const msg = `🚨 <b>NUEVA RESERVA — Venta Bodega</b>
+  await supabaseAdmin
+    .from("products")
+    .update({
+      status: "reservado",
+      reserved_at: now.toISOString(),
+      reserved_until: expiresAt.toISOString(),
+    })
+    .in("id", product_ids);
+
+  const productLines = availableProducts
+    .map((p) => `• ${p.title} — ${formatCLP(p.price_clp)}`)
+    .join("\n");
+
+  const msg = `🚨 <b>NUEVA RESERVA — Venta Bodega</b>
 
 👤 Comprador: ${buyer_name}
 📱 Teléfono: ${buyer_phone}
@@ -77,11 +80,10 @@ ${buyer_message || "sin mensaje"}
 ⏰ Expira en 12h: ${formatChileanDate(expiresAt)}
 🔗 Ver en admin: ${process.env.NEXT_PUBLIC_APP_URL}/admin/reservas`;
 
-    await sendTelegramMessage(msg);
+  await sendTelegramMessage(msg);
 
-    revalidatePath("/");
-    revalidatePath("/canasta");
+  revalidatePath("/");
+  revalidatePath("/canasta");
 
-    return { success: true as const, reservationId: reservation!.id };
-  });
+  return { success: true as const, reservationId: reservationData.id };
 }

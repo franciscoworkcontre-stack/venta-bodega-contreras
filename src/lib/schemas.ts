@@ -14,6 +14,7 @@ export const productSchema = z.object({
   price_clp: z.number().int().positive(),
   condition: z.enum(["nuevo", "usado", "muy_usado"]),
   category: z.string().optional(),
+  reference_url: z.string().url("URL inválida").optional().or(z.literal("")),
   status: z.enum(["disponible", "reservado", "vendido"]),
 });
 

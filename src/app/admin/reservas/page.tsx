@@ -1,7 +1,6 @@
 import { requireAdmin } from "@/lib/auth";
-import { db } from "@/db";
-import { reservations } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { supabaseAdmin } from "@/lib/supabase-admin";
+import type { Reservation } from "@/db/schema";
 import { formatCLP, formatChileanDate } from "@/lib/utils";
 import { AdminReservationRow } from "@/components/admin/reservation-row";
 
@@ -14,10 +13,12 @@ const statusColors: Record<string, string> = {
 
 export default async function ReservasPage() {
   await requireAdmin();
-  const allReservations = await db
-    .select()
-    .from(reservations)
-    .orderBy(desc(reservations.created_at));
+  const { data } = await supabaseAdmin
+    .from("reservations")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  const allReservations = (data ?? []) as Reservation[];
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
@@ -44,7 +45,7 @@ export default async function ReservasPage() {
                 {r.status}
               </span>
               <span className="text-xs text-[#0A0A0A]/40">
-                {formatChileanDate(r.created_at)}
+                {formatChileanDate(new Date(r.created_at))}
               </span>
             </div>
             {r.status === "activa" ? (
