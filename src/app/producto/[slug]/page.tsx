@@ -1,9 +1,9 @@
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import type { Product } from "@/db/schema";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { formatCLP } from "@/lib/utils";
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { ProductImageGallery } from "@/components/product-image-gallery";
 
 const conditionColors: Record<string, string> = {
   nuevo: "bg-[#FFD60A]",
@@ -43,20 +43,7 @@ export default async function ProductPage({
       </a>
 
       <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-        <div className="aspect-square bg-[#F4F1EA] border-2 border-[#0A0A0A] relative overflow-hidden">
-          {product.image_urls[0] ? (
-            <Image
-              src={product.image_urls[0]}
-              alt={product.title}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-6xl opacity-20">
-              📦
-            </div>
-          )}
-        </div>
+        <ProductImageGallery images={product.image_urls} title={product.title} />
 
         <div className="flex flex-col gap-4">
           <div className="flex items-start gap-3">

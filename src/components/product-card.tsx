@@ -65,22 +65,42 @@ export function ProductCard({ product, index }: { product: Product; index: numbe
         </div>
       )}
 
-      <Link href={`/producto/${product.slug}`} className="block">
-        <div className="aspect-square bg-[#F4F1EA] border-b-2 border-[#0A0A0A] relative overflow-hidden">
-          {product.image_urls[0] ? (
+      <div className="aspect-square bg-[#F4F1EA] border-b-2 border-[#0A0A0A] relative overflow-hidden">
+        {product.image_urls.length === 0 ? (
+          <Link href={`/producto/${product.slug}`} className="flex w-full h-full items-center justify-center text-4xl opacity-30">
+            📦
+          </Link>
+        ) : product.image_urls.length === 1 ? (
+          <Link href={`/producto/${product.slug}`} className="block w-full h-full relative">
             <Image
-              src={product.image_urls[0]}
+              src={product.image_urls[0] as string}
               alt={product.title}
               fill
               className="object-cover"
             />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-4xl opacity-30">
-              📦
+          </Link>
+        ) : (
+          <>
+            <div className="flex h-full overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {product.image_urls.map((url, i) => (
+                <div key={url} className="relative shrink-0 w-full h-full snap-start">
+                  <Image
+                    src={url as string}
+                    alt={`${product.title} ${i + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ))}
             </div>
-          )}
-        </div>
-      </Link>
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 pointer-events-none">
+              {product.image_urls.map((_, i) => (
+                <span key={i} className="w-1.5 h-1.5 rounded-full bg-white/80 border border-[#0A0A0A]/20" />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
 
       <div className="p-4 flex flex-col flex-1 gap-2">
         <div className="flex items-start justify-between gap-2">
