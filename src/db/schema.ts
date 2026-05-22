@@ -16,6 +16,7 @@ export const products = pgTable("products", {
   category: text("category"),
   reference_url: text("reference_url"),
   image_urls: text("image_urls").array().notNull().default(sql`'{}'`),
+  comprador: text("comprador"),
   reserved_at: timestamp("reserved_at", { withTimezone: true }),
   reserved_until: timestamp("reserved_until", { withTimezone: true }),
   sold_at: timestamp("sold_at", { withTimezone: true }),

@@ -16,6 +16,7 @@ export const productSchema = z.object({
   category: z.string().optional(),
   reference_url: z.string().url("URL inválida").optional().or(z.literal("")),
   status: z.enum(["disponible", "reservado", "vendido"]),
+  comprador: z.string().optional(),
 });
 
 export type ReservationInput = z.infer<typeof reservationSchema>;

@@ -31,6 +31,7 @@ export function ProductForm({ product }: { product?: Product }) {
           category: product.category ?? "",
           reference_url: product.reference_url ?? "",
           status: product.status,
+          comprador: product.comprador ?? "",
         }
       : {
           status: "disponible" as const,
@@ -158,6 +159,15 @@ export function ProductForm({ product }: { product?: Product }) {
           <option value="reservado">Reservado</option>
           <option value="vendido">Vendido</option>
         </select>
+      </div>
+
+      <div>
+        <label className="font-bold text-sm uppercase block mb-1">Comprador</label>
+        <input
+          {...register("comprador")}
+          className="brutal-input w-full px-3 py-2 text-sm"
+          placeholder="Nombre del comprador..."
+        />
       </div>
 
       <div>
