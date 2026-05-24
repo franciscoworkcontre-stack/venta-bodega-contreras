@@ -33,8 +33,15 @@ export default async function DashboardPage() {
         </h1>
         <div className="flex gap-2">
           <Link
+            href="/admin/resumen"
+            className="brutal-btn px-4 py-2 bg-[#FFD60A] text-sm font-black"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Resumen de cobros
+          </Link>
+          <Link
             href="/admin/producto/nuevo"
-            className="brutal-btn px-4 py-2 bg-[#FFD60A] text-sm"
+            className="brutal-btn px-4 py-2 bg-[#F4F1EA] text-sm"
             style={{ fontFamily: "var(--font-display)" }}
           >
             + Nuevo producto
@@ -94,10 +101,7 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <div className="mt-8 flex gap-3 justify-center">
-        <Link href="/admin/resumen" className="brutal-btn px-4 py-2 bg-[#FFD60A] text-sm font-black" style={{ fontFamily: "var(--font-display)" }}>
-          Resumen de cobros →
-        </Link>
+      <div className="mt-8 text-center">
         <Link href="/admin/reservas" className="brutal-btn px-4 py-2 bg-[#F4F1EA] text-sm" style={{ fontFamily: "var(--font-display)" }}>
           Historial de reservas →
         </Link>
