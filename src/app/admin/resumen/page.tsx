@@ -63,7 +63,7 @@ export default async function ResumenPage() {
                   <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
                     <div className="flex items-center gap-3">
                       <div className="w-6 h-6 rounded-full bg-gray-900 flex items-center justify-center">
-                        <span className="text-white text-xs font-bold">{nombre[0].toUpperCase()}</span>
+                        <span className="text-white text-xs font-bold">{(nombre[0] ?? "?").toUpperCase()}</span>
                       </div>
                       <span className="font-semibold text-gray-900 text-sm">{nombre}</span>
                       <span className="text-xs text-gray-400">{items.length} ítem{items.length !== 1 ? "s" : ""}</span>
