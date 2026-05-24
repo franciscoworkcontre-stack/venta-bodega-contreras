@@ -31,11 +31,13 @@ export function ProductForm({ product }: { product?: Product }) {
           category: product.category ?? "",
           reference_url: product.reference_url ?? "",
           status: product.status,
+          cantidad: product.cantidad ?? 1,
           comprador: product.comprador ?? "",
         }
       : {
           status: "disponible" as const,
           condition: "usado" as const,
+          cantidad: 1,
         },
   });
 
@@ -159,6 +161,16 @@ export function ProductForm({ product }: { product?: Product }) {
           <option value="reservado">Reservado</option>
           <option value="vendido">Vendido</option>
         </select>
+      </div>
+
+      <div>
+        <label className="font-bold text-sm uppercase block mb-1">Cantidad disponible</label>
+        <input
+          type="number"
+          {...register("cantidad", { valueAsNumber: true })}
+          min={1}
+          className="brutal-input w-full px-3 py-2 text-sm"
+        />
       </div>
 
       <div>

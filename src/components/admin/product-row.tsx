@@ -28,6 +28,11 @@ export function AdminProductRow({ product }: { product: Product }) {
       <span className="font-display font-bold text-sm flex-1 truncate">
         {product.title}
       </span>
+      {product.cantidad > 1 && (
+        <span className="text-xs font-bold px-2 py-1 border-2 border-[#0A0A0A] bg-[#F4F1EA] whitespace-nowrap">
+          x{product.cantidad}
+        </span>
+      )}
       <span className="font-black text-sm whitespace-nowrap">
         {formatCLP(product.price_clp)}
       </span>

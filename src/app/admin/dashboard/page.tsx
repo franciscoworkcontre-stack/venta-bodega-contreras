@@ -94,9 +94,12 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <div className="mt-8 text-center">
+      <div className="mt-8 flex gap-3 justify-center">
+        <Link href="/admin/resumen" className="brutal-btn px-4 py-2 bg-[#FFD60A] text-sm font-black" style={{ fontFamily: "var(--font-display)" }}>
+          Resumen de cobros →
+        </Link>
         <Link href="/admin/reservas" className="brutal-btn px-4 py-2 bg-[#F4F1EA] text-sm" style={{ fontFamily: "var(--font-display)" }}>
-          Ver historial completo de reservas →
+          Historial de reservas →
         </Link>
       </div>
     </div>
