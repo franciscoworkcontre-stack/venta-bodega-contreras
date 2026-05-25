@@ -4,6 +4,29 @@ import type { Product } from "@/db/schema";
 import { formatCLP } from "@/lib/utils";
 import Link from "next/link";
 
+function calcSplit(products: Product[]) {
+  let anastasia = 0;
+  let francisco = 0;
+  for (const p of products) {
+    const total = p.price_clp * p.cantidad;
+    if (p.division === "solo_anastasia") anastasia += total;
+    else if (p.division === "solo_francisco") francisco += total;
+    else { anastasia += total / 2; francisco += total / 2; }
+  }
+  return { anastasia, francisco };
+}
+
+const divisionLabel: Record<string, string> = {
+  familiar: "50/50",
+  solo_anastasia: "A",
+  solo_francisco: "F",
+};
+const divisionColor: Record<string, string> = {
+  familiar: "bg-gray-100 text-gray-500",
+  solo_anastasia: "bg-purple-100 text-purple-700",
+  solo_francisco: "bg-blue-100 text-blue-700",
+};
+
 export default async function ResumenPage() {
   await requireAdmin();
 
@@ -23,7 +46,8 @@ export default async function ResumenPage() {
     byComprador.get(name)!.push(p);
   }
 
-  const totalGeneral = products.reduce((sum, p) => sum + p.price_clp * p.cantidad, 0);
+  const globalSplit = calcSplit(products);
+  const totalGeneral = globalSplit.anastasia + globalSplit.francisco;
 
   return (
     <div className="min-h-screen bg-[#F7F7F5]">
@@ -32,21 +56,21 @@ export default async function ResumenPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link
-              href="/admin/dashboard"
-              className="text-xs text-gray-400 hover:text-gray-700 transition-colors tracking-widest uppercase"
-            >
+            <Link href="/admin/dashboard" className="text-xs text-gray-400 hover:text-gray-700 transition-colors tracking-widest uppercase">
               ← Volver
             </Link>
             <span className="text-gray-200">|</span>
-            <h1 className="text-sm font-semibold tracking-widest uppercase text-gray-500">
-              Resumen de cobros
-            </h1>
+            <h1 className="text-sm font-semibold tracking-widest uppercase text-gray-500">Resumen de cobros</h1>
           </div>
           {byComprador.size > 0 && (
             <div className="text-right">
-              <p className="text-xs text-gray-400 uppercase tracking-wider mb-0.5">Total general</p>
+              <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Total general</p>
               <p className="text-2xl font-bold text-gray-900 tabular-nums">{formatCLP(totalGeneral)}</p>
+              <div className="flex gap-3 justify-end mt-1">
+                <span className="text-xs text-purple-600 font-medium">A {formatCLP(globalSplit.anastasia)}</span>
+                <span className="text-xs text-gray-300">·</span>
+                <span className="text-xs text-blue-600 font-medium">F {formatCLP(globalSplit.francisco)}</span>
+              </div>
             </div>
           )}
         </div>
@@ -57,18 +81,26 @@ export default async function ResumenPage() {
           <div className="space-y-3">
             {[...byComprador.entries()].map(([nombre, items]) => {
               const total = items.reduce((sum, p) => sum + p.price_clp * p.cantidad, 0);
+              const split = calcSplit(items);
               return (
                 <div key={nombre} className="bg-white rounded-sm overflow-hidden shadow-sm border border-gray-100">
                   {/* Buyer header */}
                   <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
                     <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full bg-gray-900 flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-full bg-gray-900 flex items-center justify-center shrink-0">
                         <span className="text-white text-xs font-bold">{(nombre[0] ?? "?").toUpperCase()}</span>
                       </div>
                       <span className="font-semibold text-gray-900 text-sm">{nombre}</span>
                       <span className="text-xs text-gray-400">{items.length} ítem{items.length !== 1 ? "s" : ""}</span>
                     </div>
-                    <span className="font-bold text-gray-900 tabular-nums">{formatCLP(total)}</span>
+                    <div className="text-right">
+                      <p className="font-bold text-gray-900 tabular-nums">{formatCLP(total)}</p>
+                      <div className="flex gap-2 justify-end mt-0.5">
+                        <span className="text-xs text-purple-600">A {formatCLP(split.anastasia)}</span>
+                        <span className="text-xs text-gray-300">·</span>
+                        <span className="text-xs text-blue-600">F {formatCLP(split.francisco)}</span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Product rows */}
@@ -78,10 +110,15 @@ export default async function ResumenPage() {
                         <tr key={p.id} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/60"}>
                           <td className="pl-5 pr-3 py-2 text-gray-700">{p.title}</td>
                           <td className="px-3 py-2 text-gray-400 text-xs">{p.category}</td>
-                          <td className="px-3 py-2 text-gray-400 text-xs text-center tabular-nums">
+                          <td className="px-2 py-2 text-center">
+                            <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${divisionColor[p.division] ?? divisionColor.familiar}`}>
+                              {divisionLabel[p.division] ?? "50/50"}
+                            </span>
+                          </td>
+                          <td className="px-2 py-2 text-center text-gray-400 text-xs tabular-nums">
                             {p.cantidad > 1 ? `×${p.cantidad}` : ""}
                           </td>
-                          <td className="pl-3 pr-5 py-2 text-right font-medium text-gray-900 tabular-nums whitespace-nowrap">
+                          <td className="pl-2 pr-5 py-2 text-right font-medium text-gray-900 tabular-nums whitespace-nowrap">
                             {formatCLP(p.price_clp * p.cantidad)}
                           </td>
                         </tr>
@@ -89,7 +126,7 @@ export default async function ResumenPage() {
                     </tbody>
                     <tfoot>
                       <tr className="border-t border-gray-100">
-                        <td colSpan={3} className="pl-5 py-2 text-xs text-gray-400 uppercase tracking-wider">Total</td>
+                        <td colSpan={4} className="pl-5 py-2 text-xs text-gray-400 uppercase tracking-wider">Total</td>
                         <td className="pr-5 py-2 text-right font-bold text-gray-900 tabular-nums">{formatCLP(total)}</td>
                       </tr>
                     </tfoot>
@@ -97,6 +134,21 @@ export default async function ResumenPage() {
                 </div>
               );
             })}
+
+            {/* Global split summary */}
+            <div className="bg-gray-900 rounded-sm px-5 py-4 flex items-center justify-between">
+              <p className="text-xs text-gray-400 uppercase tracking-widest">División total</p>
+              <div className="flex gap-6">
+                <div className="text-right">
+                  <p className="text-xs text-purple-400 uppercase tracking-wider mb-0.5">Anastasia</p>
+                  <p className="text-lg font-bold text-white tabular-nums">{formatCLP(globalSplit.anastasia)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-blue-400 uppercase tracking-wider mb-0.5">Francisco</p>
+                  <p className="text-lg font-bold text-white tabular-nums">{formatCLP(globalSplit.francisco)}</p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

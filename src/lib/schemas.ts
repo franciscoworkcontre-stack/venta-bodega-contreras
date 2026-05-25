@@ -17,6 +17,7 @@ export const productSchema = z.object({
   reference_url: z.string().url("URL inválida").optional().or(z.literal("")),
   status: z.enum(["disponible", "reservado", "vendido"]),
   cantidad: z.number().int().min(1),
+  division: z.enum(["familiar", "solo_anastasia", "solo_francisco"]),
   comprador: z.string().optional(),
 });
 

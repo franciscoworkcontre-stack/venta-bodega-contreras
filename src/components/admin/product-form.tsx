@@ -32,12 +32,14 @@ export function ProductForm({ product }: { product?: Product }) {
           reference_url: product.reference_url ?? "",
           status: product.status,
           cantidad: product.cantidad ?? 1,
+          division: (product.division as "familiar" | "solo_anastasia" | "solo_francisco") ?? "familiar",
           comprador: product.comprador ?? "",
         }
       : {
           status: "disponible" as const,
           condition: "usado" as const,
           cantidad: 1,
+          division: "familiar" as const,
         },
   });
 
@@ -160,6 +162,18 @@ export function ProductForm({ product }: { product?: Product }) {
           <option value="disponible">Disponible</option>
           <option value="reservado">Reservado</option>
           <option value="vendido">Vendido</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="font-bold text-sm uppercase block mb-1">División</label>
+        <select
+          {...register("division")}
+          className="brutal-input w-full px-3 py-2 text-sm"
+        >
+          <option value="familiar">Familiar (50/50)</option>
+          <option value="solo_anastasia">Solo Anastasia</option>
+          <option value="solo_francisco">Solo Francisco</option>
         </select>
       </div>
 
