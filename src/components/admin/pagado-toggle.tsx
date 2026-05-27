@@ -9,7 +9,7 @@ export function PagadoToggle({ nombre, pagado }: { nombre: string; pagado: boole
   const handleChange = () => {
     const next = !checked;
     setChecked(next);
-    startTransition(() => togglePagado(nombre, next));
+    startTransition(() => { void togglePagado(nombre, next); });
   };
 
   return (
