@@ -107,3 +107,12 @@ export async function eliminarProducto(id: string) {
   revalidatePath("/admin/dashboard");
   return { success: true as const };
 }
+
+export async function togglePagado(nombre: string, pagado: boolean) {
+  await requireAdmin();
+  await supabaseAdmin
+    .from("compradores")
+    .upsert({ nombre, pagado }, { onConflict: "nombre" });
+  revalidatePath("/admin/resumen");
+  return { success: true as const };
+}
